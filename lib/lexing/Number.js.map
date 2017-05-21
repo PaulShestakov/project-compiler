@@ -1,1 +1,0 @@
-{"version":3,"file":"Number.js","sourceRoot":"","sources":["../../src/lexing/Number.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,mCAA8B;AAC9B,+BAA0B;AAE1B;IAAqB,0BAAK;IAGzB,gBAAY,KAAa;QAAzB,YACC,kBAAM,aAAG,CAAC,MAAM,CAAC,SAEjB;QADA,KAAI,CAAC,KAAK,GAAG,KAAK,CAAC;;IACpB,CAAC;IAED,yBAAQ,GAAR;QACC,MAAM,CAAC,IAAI,CAAC,KAAK,CAAC;IACnB,CAAC;IACF,aAAC;AAAD,CAAC,AAXD,CAAqB,eAAK,GAWzB"}
