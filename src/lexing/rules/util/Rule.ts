@@ -1,13 +1,13 @@
 
-import Nonterminal from "./Nonterminal";
+import NonTerminal from "./NonTerminal";
 import Terminal from "./Terminal";
 
 
 export default class Rule {
-	private lhs: Nonterminal;
-	private rhs: Array<Terminal | Nonterminal>;
+	public lhs: NonTerminal;
+	public rhs: Array<Terminal | NonTerminal>;
 
-	constructor(lhs: Nonterminal, rhs: Array<Terminal | Nonterminal>) {
+	constructor(lhs: NonTerminal, rhs: Array<Terminal | NonTerminal>) {
 		this.lhs = lhs;
 		this.rhs = rhs;
 	}
@@ -16,4 +16,11 @@ export default class Rule {
 		console.log(this.lhs + ' -> ' + this.rhs.join(' '));
 	}
 
+	equals(rule: Rule): boolean {
+		return this.lhs.equals(rule.lhs)
+			&& this.rhs.length === rule.rhs.length
+			&& this.rhs.every((elem, index) => {
+				return elem.equals(rule.rhs[index]);
+			});
+	}
 }

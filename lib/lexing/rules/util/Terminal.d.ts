@@ -1,7 +1,7 @@
-import Tag from "../../util/Tag";
 export default class Terminal {
     private tag;
-    constructor(tag: Tag);
-    getTag(): Tag;
+    constructor(tag: string);
+    getTag(): string;
     toString(): string;
+    equals(term: any): boolean;
 }

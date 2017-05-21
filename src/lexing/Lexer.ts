@@ -123,4 +123,12 @@ export default class Lexer {
 		}
 		return character.match(/[a-z]/i);
 	}
+
+
+	static getTokens(fileName: string) {
+
+
+
+	}
+
 }

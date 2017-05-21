@@ -17,7 +17,7 @@ export default class Terminal {
 		return `<TERMINAL: ${this.getTag()}>`;
 	}
 
-	equals(term: Terminal) {
+	equals(term: any) {
 		return term instanceof Terminal
 			&& term.getTag() === this.getTag();
 	}

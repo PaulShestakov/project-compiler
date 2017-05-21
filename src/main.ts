@@ -1,37 +1,48 @@
+
+import RulesParser from "./lexing/rules/RulesParser";
+import Rule from "./lexing/rules/util/Rule";
+import { start } from "repl";
+import Token from "../lib/lexing/util/Token";
+
 import Lexer from './lexing/Lexer';
 import Tag from './lexing/util/Tag';
-import RulesParser from "./lexing/rules/RulesParser";
+import { Parser } from "./parsing/Parser";
 
 
 
 
 
+function main() {
+	let tokens = getTokens('./text.txt');
 
-function scan() {
+	let rules = RulesParser.getRules('./testB.txt');
+	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
 
-	// let fileName = './test2.txt';
-	//
-	// let lexer = new Lexer(fileName);
-	//
-	// let tokens = [];
-	//
-	// while (true) {
-	// 	let nextToken = lexer.nextToken();
-	// 	tokens.push(nextToken);
-	//
-	// 	if (nextToken.getTag() === Tag.EOF) {
-	// 		break;
-	// 	}
-	// }
-	//
-	// console.log(tokens);
-
-
-	let rules = RulesParser.getRules('./rules.txt');
-
-	rules.forEach(rule => rule.logRule())
-
+	let parser = new Parser(rules, tokens, grammarSymbols);
+	parser.parse();
 }
 
+main();
 
-scan();
+
+
+
+
+
+
+function getTokens(fileName: string): Token[] {
+	let lexer = new Lexer(fileName);
+
+	let tokens = [];
+
+	while (true) {
+		let nextToken = lexer.nextToken();
+		tokens.push(nextToken);
+
+		if (nextToken.getTag() === Tag.EOF) {
+			break;
+		}
+	}
+
+	return tokens;
+}

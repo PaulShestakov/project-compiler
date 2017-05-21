@@ -4,10 +4,12 @@ const fs = require('fs');
 import { assert } from '../../util';
 import Tag from '../util/Tag';
 import Rule from "./util/Rule";
-import Nonterminal from "./util/Nonterminal";
+import NonTerminal from "./util/NonTerminal";
 
 
 export default class RulesParser {
+
+	// Parse provided grammar and return it's rules
 	public static getRules(fileName) {
 		let fileContents = fs.readFileSync(fileName, 'utf8');
 
@@ -50,14 +52,39 @@ export default class RulesParser {
 							return new Terminal(tag);
 						}
 						else {
-							return new Nonterminal(element);
+							return new NonTerminal(element);
 						}
 					});
 
 				return new Rule(
-					new Nonterminal(lhs),
+					new NonTerminal(lhs),
 					rhsElements
 				);
 			});
+	}
+
+	// Return all grammar symbols, mentioned in rules, defined by provided grammar
+	public static getGrammarSymbols(rules: Rule[]) {
+		let result: Array<Terminal|NonTerminal> = [];
+
+		rules.forEach(rule => {
+			let ruleSymbols: Array<Terminal|NonTerminal> = [rule.lhs];
+
+			rule.rhs.forEach(symbol => {ruleSymbols.push(symbol)});
+
+			ruleSymbols.forEach(symbol => {
+
+				let found = result.filter(savedSymbol => {
+					return savedSymbol.equals(symbol);
+				}).length > 0;
+
+				if (!found) {
+					result.push(symbol);
+				}
+			})
+
+		});
+
+		return result;
 	}
 }

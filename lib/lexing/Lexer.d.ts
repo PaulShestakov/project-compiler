@@ -12,4 +12,5 @@ export default class Lexer {
     static isLineEnding(character: any): boolean;
     static isDigit(character: any): boolean;
     static isLetter(character: any): boolean;
+    static getTokens(fileName: string): void;
 }

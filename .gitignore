@@ -1,0 +1,17 @@
+### compiled from Typescript js ###
+lib/
+
+
+### npm ###
+node_modules/
+npm-debug.log
+
+
+### macOS ###
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+
+### WebStorm ###
+.idea/

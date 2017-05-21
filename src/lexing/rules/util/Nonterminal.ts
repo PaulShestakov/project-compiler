@@ -1,6 +1,5 @@
 
-
-export default class Nonterminal {
+export default class NonTerminal {
 	private name: string;
 
 	constructor(name: string) {
@@ -15,8 +14,8 @@ export default class Nonterminal {
 		return `(NONTERMINAL: ${this.getName()})`;
 	}
 
-	equals(nonterm: Nonterminal) {
-		return nonterm instanceof Nonterminal
+	equals(nonterm: any) {
+		return nonterm instanceof NonTerminal
 			&& nonterm.getName() === this.getName();
 	}
 }

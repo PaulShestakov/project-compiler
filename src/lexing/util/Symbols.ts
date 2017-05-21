@@ -8,6 +8,7 @@ const SYMBOLS = {
 
 	'+': Tag.PLUS,
 	'-': Tag.MINUS,
+	'*': Tag.MULTIPLY,
 
 	'>': Tag.MORE,
 	'<': Tag.LESS,
