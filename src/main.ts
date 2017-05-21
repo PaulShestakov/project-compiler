@@ -1,33 +1,8 @@
-
 import RulesParser from "./lexing/rules/RulesParser";
-import Rule from "./lexing/rules/util/Rule";
-import { start } from "repl";
 import Token from "../lib/lexing/util/Token";
-
 import Lexer from './lexing/Lexer';
 import Tag from './lexing/util/Tag';
 import { Parser } from "./parsing/Parser";
-
-
-
-
-
-function main() {
-	let tokens = getTokens('./text.txt');
-
-	let rules = RulesParser.getRules('./testB.txt');
-	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
-
-	let parser = new Parser(rules, tokens, grammarSymbols);
-	parser.parse();
-}
-
-main();
-
-
-
-
-
 
 
 function getTokens(fileName: string): Token[] {
@@ -46,3 +21,16 @@ function getTokens(fileName: string): Token[] {
 
 	return tokens;
 }
+
+
+function main() {
+	let tokens = getTokens('./input/text.txt');
+
+	let rules = RulesParser.getRules('./input/testB.txt');
+	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
+
+	let parser = new Parser(rules, tokens, grammarSymbols);
+	parser.parse();
+}
+
+main();

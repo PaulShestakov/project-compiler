@@ -1,14 +1,8 @@
-
 import NonTerminal from "../lexing/rules/util/NonTerminal";
 import Terminal from "../lexing/rules/util/Terminal";
-import RulesParser from "./../lexing/rules/RulesParser";
 import Rule from "./../lexing/rules/util/Rule";
-import { start } from "repl";
 import Token from "../../lib/lexing/util/Token";
-
-import Lexer from './../lexing/Lexer';
 import Tag from './../lexing/util/Tag';
-import { runInNewContext } from "vm";
 import Condition from "./util/Condition";
 import Item from "./util/Item";
 
@@ -16,30 +10,11 @@ import Item from "./util/Item";
 const START_NON_TERMINAL = new NonTerminal('S');
 const EOF_TERMINAL = new Terminal('EOF');
 
-const TERMINALS = Object.keys(Tag).map(key => new Terminal(Tag[key]));
-
 
 function ThrowParseError(config) {
 	Object.keys(config).map(key => config[key]).forEach(val => {console.log(val)});
 	throw new Error('Parse error');
 }
-
-
-
-// SHIFT
-// REDUCE
-// ACCEPT
-// ERROR
-function ACTION(cond: Condition, token: Token) {
-
-}
-
-
-
-
-
-
-
 
 
 export class Parser {
@@ -176,6 +151,10 @@ export class Parser {
 	}
 
 
+	ACTION(index: number, symbol: Terminal | NonTerminal) {
+		return this.getFromFSM(index, symbol);
+	}
+
 
 	buildCanonicalSet() {
 		let that = this;
@@ -217,11 +196,8 @@ export class Parser {
 				})
 			})
 		}
-
 		this.canonicalSet = resultConditions;
 	}
-
-
 
 
 	buildFSMTable() {
@@ -304,15 +280,10 @@ export class Parser {
 	}
 
 
-
-
 	parse() {
-
 		this.buildCanonicalSet();
 
 		this.buildFSMTable();
-
-		console.log(42);
 
 		let startCondIndex = 0;
 		let startCond = this.canonicalSet[0];
@@ -324,7 +295,7 @@ export class Parser {
 			let token = this.tokens[0];
 			let terminal = new Terminal(token.getTag());
 
-			let action = this.getFromFSM(cond.getIndex(), terminal);
+			let action = this.ACTION(cond.getIndex(), terminal);
 
 			if (!action) {
 				ThrowParseError({
@@ -358,7 +329,7 @@ export class Parser {
 
 				let topState = stack[stack.length - 1];
 
-				let actionAfterReduce = this.getFromFSM(topState.getIndex(), action.description.rule.lhs);
+				let actionAfterReduce = this.ACTION(topState.getIndex(), action.description.rule.lhs);
 				stack.push(actionAfterReduce.description.nextState);
 			}
 
@@ -391,5 +362,4 @@ export class Parser {
 			return op.symbol.equals(symbol);
 		})[0];
 	}
-
 }

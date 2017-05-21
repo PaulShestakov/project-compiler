@@ -1,5 +1,3 @@
-import Tag from './Tag';
-
 export default class Token {
 	private tag: string;
 	private value: any;

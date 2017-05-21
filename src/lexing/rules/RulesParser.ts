@@ -1,14 +1,12 @@
-import Terminal from "./util/Terminal";
 const fs = require('fs');
 
-import { assert } from '../../util';
+import Terminal from "./util/Terminal";
 import Tag from '../util/Tag';
 import Rule from "./util/Rule";
 import NonTerminal from "./util/NonTerminal";
 
 
 export default class RulesParser {
-
 	// Parse provided grammar and return it's rules
 	public static getRules(fileName) {
 		let fileContents = fs.readFileSync(fileName, 'utf8');
@@ -46,7 +44,7 @@ export default class RulesParser {
 
 				let rhsElements = rhs.split(' ')
 					.filter(element => !! element)
-					.map(element => {
+					.map((element: string): Terminal | NonTerminal => {
 						if (/<.*>/.test(element)) {
 							let tag = Tag[element.slice(1, -1)];
 							return new Terminal(tag);
@@ -84,7 +82,6 @@ export default class RulesParser {
 			})
 
 		});
-
 		return result;
 	}
 }

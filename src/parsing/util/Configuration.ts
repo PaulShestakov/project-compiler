@@ -1,6 +1,6 @@
-
 import Condition from "./Condition";
 import Token from "../../lexing/util/Token";
+
 
 export default class Configuration {
 	private stack: Condition[];
