@@ -1,4 +1,3 @@
-
 export default class NonTerminal {
 	private name: string;
 

@@ -1,8 +1,7 @@
-
-
 import NonTerminal from "../../lexing/rules/util/NonTerminal";
 import Terminal from "../../lexing/rules/util/Terminal";
 import Item from "./Item";
+
 
 let sequenceIndexGenerator = function() {
 	let i = 0;

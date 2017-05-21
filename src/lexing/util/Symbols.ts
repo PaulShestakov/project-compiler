@@ -1,5 +1,6 @@
 import Tag from './Tag';
 
+
 const SYMBOLS = {
 	'{': Tag.L_BRACE,
 	'}': Tag.R_BRACE,
