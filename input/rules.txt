@@ -1,11 +1,12 @@
-S -> program;
+S' -> PROGRAM;
 
-program -> block;
+PROGRAM -> BLOCK;
 
-block -> <L_BRACE> stmts <R_BRACE>;
+BLOCK -> <L_BRACE> STMTS <R_BRACE>;
 
-stmts -> stmt stmts
-    | <E>;
+STMTS -> STMT <SEMICOLON>;
 
-stmt -> expr
-    | <IF> <L_BRACE> expr <R_BRACE> stmt;
+STMT -> EXPR
+    | <IF> <L_BRACE> EXPR <R_BRACE> STMT;
+
+EXPR -> <VAR> <ID> <EQUALS> <NUMBER>;

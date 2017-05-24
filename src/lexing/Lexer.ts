@@ -86,7 +86,27 @@ export default class Lexer {
 				else {
 					token = new Token(Tag.ID, word);
 				}
-			} else {
+			}
+
+			else if (Lexer.isColumn(this.currentCharacter)) {
+				let string = '';
+				this.peek();
+
+				while(!Lexer.isColumn(this.currentCharacter)) {
+					string += this.currentCharacter;
+					this.peek();
+				}
+
+				if (Lexer.isColumn(this.currentCharacter)) {
+					this.peek();
+				} else {
+					throw new Error(`Closing column not found: '${this.currentCharacter}'`);
+				}
+
+				token = new Token(Tag.STRING, string);
+			}
+
+			else {
 				throw new Error(`Unsupported character: '${this.currentCharacter}'`);
 			}
 		}
@@ -122,5 +142,9 @@ export default class Lexer {
 			return false;
 		}
 		return character.match(/[a-z]/i);
+	}
+
+	static isColumn(character): boolean {
+		return character === '\'';
 	}
 }
