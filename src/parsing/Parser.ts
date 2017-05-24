@@ -7,8 +7,10 @@ import Condition from "./util/Condition";
 import Item from "./util/Item";
 
 
-const START_NON_TERMINAL = new NonTerminal('S');
+const START_NON_TERMINAL = new NonTerminal('S\'');
+const EMPTY_TERMINAL = new NonTerminal('E');
 const EOF_TERMINAL = new Terminal('EOF');
+
 
 
 function ThrowParseError(config) {
@@ -34,9 +36,12 @@ export class Parser {
 	}
 
 
-
-	FIRST(X: NonTerminal): Terminal[] {
+	FIRST(X: Terminal | NonTerminal): Terminal[] {
 		let result: Terminal[] = [];
+
+		if (X instanceof Terminal) {
+			return [X];
+		}
 
 		this.rules.forEach(rule => {
 			// Rules X = ...
@@ -56,13 +61,11 @@ export class Parser {
 	}
 
 
-
 	FOLLOW(X: NonTerminal): Terminal[] {
 
 		if (X.equals(START_NON_TERMINAL)) {
 			return [EOF_TERMINAL];
 		}
-
 
 		let result: Terminal[] = [];
 
@@ -83,7 +86,6 @@ export class Parser {
 						else if (nextElem instanceof NonTerminal) {
 							result = result.concat(this.FIRST(nextElem));
 						}
-
 					}
 
 					// Rule Y = ... X
@@ -288,7 +290,6 @@ export class Parser {
 		let startCondIndex = 0;
 		let startCond = this.canonicalSet[0];
 		let stack = [startCond];
-
 
 		while (true) {
 			let cond = stack[stack.length - 1];

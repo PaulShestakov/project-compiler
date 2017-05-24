@@ -18,6 +18,8 @@ const SYMBOLS = {
 	'<=': Tag.LESS_EQUAL,
 	'==': Tag.LOOSE_EQUAL,
 	'===': Tag.STRICT_EQUAL,
+
+	';': Tag.SEMICOLON
 };
 
 export default SYMBOLS;

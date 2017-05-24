@@ -1,5 +1,6 @@
 const Tag = {
 	NUMBER: 'NUMBER',
+	STRING: 'STRING',
 	WORD: 'WORD',
 
 	// SYMBOLS
@@ -17,6 +18,7 @@ const Tag = {
 	LESS_EQUAL: 'LESS_EQUAL',
 	LOOSE_EQUAL: 'LOOSE_EQUAL',
 	STRICT_EQUAL: 'STRICT_EQUAL',
+	SEMICOLON: 'SEMICOLON',
 
 
 	// KEYWORDS
@@ -24,6 +26,8 @@ const Tag = {
 	ELSE: 'ELSE',
 	DO: 'DO',
 	WHILE: 'WHILE',
+	VAR: 'VAR',
+
 
 	// SPECIAL
 	EOF: 'EOF',

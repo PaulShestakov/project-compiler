@@ -6,6 +6,7 @@ const KEYWORDS = {
 	'else': Tag.ELSE,
 	'do': Tag.DO,
 	'while': Tag.WHILE,
+	'var': Tag.VAR
 };
 
 export default KEYWORDS;
