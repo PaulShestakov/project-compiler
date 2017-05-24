@@ -24,11 +24,11 @@ function getTokens(fileName: string): Token[] {
 
 
 function main() {
-	let tokens = getTokens('./input/newText.txt');
+	let tokens = getTokens('./input/newText2.txt');
 
-	console.log(tokens);
+	//console.log(tokens);
 
-	let rules = RulesParser.getRules('./input/newRules.txt');
+	let rules = RulesParser.getRules('./input/newRules2.txt');
 	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
 
 	let parser = new Parser(rules, tokens, grammarSymbols);

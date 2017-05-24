@@ -8,7 +8,7 @@ import Item from "./util/Item";
 
 
 const START_NON_TERMINAL = new NonTerminal('S\'');
-const EMPTY_TERMINAL = new NonTerminal('E');
+const EMPTY_TERMINAL = new Terminal('E');
 const EOF_TERMINAL = new Terminal('EOF');
 
 
@@ -36,32 +36,53 @@ export class Parser {
 	}
 
 
-	FIRST(X: Terminal | NonTerminal): Terminal[] {
+	FIRST(X: Terminal | NonTerminal | Array<Terminal | NonTerminal>): Terminal[] {
+		let that = this;
 		let result: Terminal[] = [];
 
-		if (X instanceof Terminal) {
-			return [X];
-		}
+		if (!Array.isArray(X)) {
 
-		this.rules.forEach(rule => {
-			// Rules X = ...
-			if (rule.lhs.equals(X)) {
+			if (X instanceof Terminal) {
+				return [X];
+			}
 
-				let firstElement = rule.rhs[0];
-
-				if (firstElement instanceof Terminal) {
-					result.push(firstElement);
+			this.rules.forEach(rule => {
+				// Rules X = ...
+				if (rule.lhs.equals(X)) {
+					result = result.concat(that.FIRST(rule.rhs));
 				}
-				else if (firstElement instanceof NonTerminal) {
-					result = result.concat(this.FIRST(firstElement));
+			});
+
+
+		} else {
+
+			let currentXIndex = 0;
+
+			for (let i = 0; i < X.length; i++) {
+				let set = that.FIRST(X[i]);
+
+				let hasEmptyTerminal = set.filter(term => {
+						return term.equals(EMPTY_TERMINAL);
+					}).length > 0;
+
+				result = result.concat(set.filter(x => !x.equals(EMPTY_TERMINAL)));
+
+				if (i === X.length - 1 && hasEmptyTerminal) {
+					result.push(EMPTY_TERMINAL);
+				}
+
+				if (!hasEmptyTerminal) {
+					break;
 				}
 			}
-		});
+		}
+
 		return result;
 	}
 
 
 	FOLLOW(X: NonTerminal): Terminal[] {
+		let that = this;
 
 		if (X.equals(START_NON_TERMINAL)) {
 			return [EOF_TERMINAL];
@@ -75,27 +96,39 @@ export class Parser {
 			rule.rhs.forEach((elem, index) => {
 				if (elem instanceof NonTerminal && elem.equals(X)) {
 
-					// Rule Y = ... X ...
+					// Rule Y = a X b
 					if (index < rhsLen - 1) {
 
-						let nextElem = rule.rhs[index + 1];
+						let b = rule.rhs.slice(index + 1);
 
-						if (nextElem instanceof Terminal) {
-							result.push(nextElem);
-						}
-						else if (nextElem instanceof NonTerminal) {
-							result = result.concat(this.FIRST(nextElem));
+						let firstB = that.FIRST(b);
+
+						let hasEmptyTerminal = firstB.filter(term => {
+								return term.equals(EMPTY_TERMINAL);
+							}).length > 0;
+
+						result = result.concat(firstB.filter(elem => !elem.equals(EMPTY_TERMINAL)));
+
+						// If may be empty
+						if (hasEmptyTerminal) {
+							// Do not create recursion calls
+							if (!rule.lhs.equals(X)) {
+								result = result.concat(that.FOLLOW(rule.lhs))
+							}
 						}
 					}
 
-					// Rule Y = ... X
+					// Rule Y = a X
 					if (index === rhsLen - 1) {
-						result = result.concat(this.FOLLOW(rule.lhs));
+						// Do not create recursion calls
+						if (!rule.lhs.equals(X)) {
+							result = result.concat(this.FOLLOW(rule.lhs));
+						}
 					}
 				}
 			});
 		});
-		return result;
+		return this.dedupSymbols(result);
 	}
 
 
@@ -119,13 +152,26 @@ export class Parser {
 
 						if (nextElem.equals(rule.lhs)) {
 
-							let isAlreadyAdded = closure.filter(item => {
-								return item.rule.equals(rule)
-									&& item.marker === 0;
-							}).length > 0;
+							// Check for empty rule
+							if (rule.rhs.length == 1 && rule.rhs[0].equals(EMPTY_TERMINAL)) {
+								let isAlreadyAdded = closure.filter(item => {
+										return item.rule.equals(rule)
+											&& item.marker === 1;
+									}).length > 0;
 
-							if (!isAlreadyAdded) {
-								newItems.push(new Item(rule, 0));
+								if (!isAlreadyAdded) {
+									newItems.push(new Item(rule, 1));
+								}
+							}
+							else {
+								let isAlreadyAdded = closure.filter(item => {
+										return item.rule.equals(rule)
+											&& item.marker === 0;
+									}).length > 0;
+
+								if (!isAlreadyAdded) {
+									newItems.push(new Item(rule, 0));
+								}
 							}
 						}
 					})
@@ -283,9 +329,13 @@ export class Parser {
 
 
 	parse() {
+
 		this.buildCanonicalSet();
 
 		this.buildFSMTable();
+
+		// Collect sequence of reduces to build a tree
+		let reducesSequence = [];
 
 		let startCondIndex = 0;
 		let startCond = this.canonicalSet[0];
@@ -308,25 +358,33 @@ export class Parser {
 
 			else if (action.description.operation === 'SHIFT') {
 
-				console.log('SHIFT');
-				console.log(JSON.stringify(action.description.item));
-				console.log(stack.map(x => x.getIndex()).join());
+				// console.log('SHIFT');
+				// console.log(JSON.stringify(action.description.item));
+				// console.log(stack.map(x => x.getIndex()).join());
 
 				this.tokens = this.tokens.slice(1);
 				stack.push(action.description.nextState);
 
-				console.log(JSON.stringify(action.description.nextState));
+				//console.log(JSON.stringify(action.description.nextState));
 			}
 
 			else if (action.description.operation === 'REDUCE') {
 
 				console.log('REDUCE');
-				console.log(JSON.stringify(action.description.item));
-				console.log(stack.map(x => x.getIndex()).join());
+				action.description.rule.logRule();
+				//console.log(JSON.stringify(action.description.item));
+				//console.log(stack.map(x => x.getIndex()).join());
 
-				let length = action.description.rule.rhs.length;
+				var length;
+				if (action.description.rule.rhs[0].equals(EMPTY_TERMINAL)) {
+					length = 0;
+				} else {
+					length = action.description.rule.rhs.length;
+				}
 
-				stack = stack.slice(0, -length);
+				if (length > 0) {
+					stack = stack.slice(0, -length);
+				}
 
 				let topState = stack[stack.length - 1];
 
@@ -345,6 +403,10 @@ export class Parser {
 				});
 			}
 		}
+
+		console.log(reducesSequence);
+
+
 	}
 
 
@@ -362,5 +424,21 @@ export class Parser {
 		return this.FSM[index].filter(op => {
 			return op.symbol.equals(symbol);
 		})[0];
+	}
+	dedup(array, comp) {
+		let unique = [];
+
+		array.forEach(item => {
+			if (unique.filter(comp.bind(null, item)).length === 0) {
+				unique.push(item);
+			}
+		});
+
+		return unique;
+	}
+	dedupSymbols(symbols) {
+		return this.dedup(symbols, (a, b) => {
+			return a.equals(b);
+		})
 	}
 }
