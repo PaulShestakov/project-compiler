@@ -12,15 +12,34 @@ export default class Lexer {
 	private characterIndex: number = -1;
 	private currentCharacter: string = null;
 
+	// Will be filled after lex work
+	private tokens: Token[] = [];
+	private symbolsTable = {};
+
 	constructor(fileName: string) {
 		this.fileContents = fs.readFileSync(fileName, 'utf8');
 	}
 
-	peek(): void {
+	public lex(): void {
+		while (true) {
+			let nextToken = this.nextToken();
+			this.tokens.push(nextToken);
+
+			if (nextToken.getTag() === Tag.EOF) {
+				break;
+			}
+		}
+	}
+
+	public getTokens(): Token[] {
+		return this.tokens;
+	}
+
+	private peek(): void {
 		this.skipAndPeek(0);
 	}
 
-	skipAndPeek(skipLength: number): void {
+	private skipAndPeek(skipLength: number): void {
 		if (this.characterIndex + 1 + skipLength > this.fileContents.length - 1) {
 			this.currentCharacter = null;
 		} else {
@@ -29,7 +48,7 @@ export default class Lexer {
 		}
 	}
 
-	preview(length: number): string | null {
+	private preview(length: number): string | null {
 		if (this.characterIndex + 1 > this.fileContents.length - 1) {
 			return null;
 		} else {
@@ -37,7 +56,7 @@ export default class Lexer {
 		}
 	}
 
-	nextToken(): Token {
+	private nextToken(): Token {
 		let token: Token = null;
 		this.peek();
 
@@ -56,6 +75,7 @@ export default class Lexer {
 
 			else if (SYMBOLS[this.currentCharacter + this.preview(1)]) {
 				token = new Token(SYMBOLS[this.currentCharacter + this.preview(1)]);
+				this.peek();
 			}
 			else if (SYMBOLS[this.currentCharacter]) {
 				token = new Token(SYMBOLS[this.currentCharacter]);
@@ -85,6 +105,8 @@ export default class Lexer {
 				}
 				else {
 					token = new Token(Tag.ID, word);
+
+
 				}
 			}
 
@@ -112,7 +134,6 @@ export default class Lexer {
 		}
 		return token;
 	}
-
 
 	static isWhiteSpace(character): boolean {
 		let charCode: number = character.charCodeAt(0);

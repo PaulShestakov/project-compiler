@@ -1,7 +1,0 @@
-S' -> E;
-
-E -> E <PLUS> T | T;
-
-T -> T <MULTIPLY> F | F;
-
-F -> <L_BRACE> E <R_BRACE> | <ID>;

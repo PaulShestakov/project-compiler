@@ -40,7 +40,14 @@ export default class RulesParser {
 				let parts = ruleString.split('->');
 
 				let lhs = parts[0].trim();
-				let rhs = parts[1].trim();
+				let rhsParts = parts[1].split('#');
+
+				let rhs = rhsParts[0].trim();
+
+				let semanticRule;
+				if (rhsParts[1]) {
+					semanticRule = eval(rhsParts[1]);
+				}
 
 				let rhsElements = rhs.split(' ')
 					.filter(element => !! element)
@@ -56,7 +63,8 @@ export default class RulesParser {
 
 				return new Rule(
 					new NonTerminal(lhs),
-					rhsElements
+					rhsElements,
+					semanticRule
 				);
 			});
 	}
