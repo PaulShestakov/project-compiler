@@ -1,38 +1,29 @@
 import RulesParser from "./lexing/rules/RulesParser";
-import Token from "../lib/lexing/util/Token";
+import Token from "./lexing/util/Token";
 import Lexer from './lexing/Lexer';
-import Tag from './lexing/util/Tag';
 import { Parser } from "./parsing/Parser";
+import Rule from "./lexing/rules/util/Rule";
+import { buildParsingTree } from "./parsing/tree/main";
 
 
-function getTokens(fileName: string): Token[] {
-	let lexer = new Lexer(fileName);
+(function() {
+	let lexer = new Lexer('./input/newText2.txt');
+	lexer.lex();
+	let tokens: Token[] = lexer.getTokens();
 
-	let tokens = [];
-
-	while (true) {
-		let nextToken = lexer.nextToken();
-		tokens.push(nextToken);
-
-		if (nextToken.getTag() === Tag.EOF) {
-			break;
-		}
-	}
-
-	return tokens;
-}
-
-
-function main() {
-	let tokens = getTokens('./input/newText2.txt');
-
-	//console.log(tokens);
+	console.log(tokens);
 
 	let rules = RulesParser.getRules('./input/newRules2.txt');
 	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
 
 	let parser = new Parser(rules, tokens, grammarSymbols);
-	parser.parse();
-}
+	let reducesSequence: Rule[] = parser.parse();
 
-main();
+	let tree = buildParsingTree(reducesSequence);
+
+
+
+
+
+
+})();

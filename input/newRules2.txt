@@ -15,6 +15,55 @@ CLOSED_STMTS ->
 
 CLOSED_STMT -> STMT <SEMICOLON>;
 
+
 STMT ->
-    <VAR> <ID> <EQUAL> <NUMBER>
-    | <VAR> <ID> <EQUAL> <STRING>;
+    <VAR> <ID> <EQUAL> EXPR
+        #   tokens => new Node('DECLARATION', tokens[1].name, tokens[3].value)
+
+    | <IF> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+        #   tokens => new Node('IF', tokens[2].name, tokens[4].value)
+
+    | <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+        #   tokens => new Node('WHILE', tokens[2].name, tokens[4].value)
+
+    | <DO> BLOCK <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS>
+        #   tokens => new Node('DO_WHILE', tokens[1].name, tokens[4].value)
+    ;
+
+
+EXPR ->
+    EXPR <PLUS> TERM
+        #   tokens => new Node('PLUS', tokens[0].value, tokens[2].value)
+
+    | EXPR <MINUS> TERM
+        #   tokens => new Node('MINUS', tokens[0].value, tokens[2].value)
+
+    | TERM
+        #   tokens => new Node('', tokens[0].value)
+
+    | EXPR <EQUAL> EXPR
+        #   tokens => new Node('EQUAL', tokens[0].value, tokens[2].value)
+
+    | EXPR <PLUS_EQUAL> EXPR
+        #   tokens => new Node('PLUS_EQUAL', tokens[0].value, tokens[2].value)
+    ;
+
+TERM ->
+    TERM <MULTIPLY> FACTOR
+        #   tokens => new Node('MULTIPLY', tokens[0].value, tokens[2].value)
+
+    | TERM <DIVIDE> FACTOR
+        #   tokens => new Node('DIVIDE', tokens[0].value, tokens[2].value)
+
+    | FACTOR
+        #   tokens => new Node('', tokens[0].value)
+    ;
+
+
+FACTOR ->
+    <NUMBER>
+        #   tokens => new Leaf('NUMBER', tokens[0].value)
+
+    | <L_PARENTHESIS> EXPR <R_PARENTHESIS>
+        #   tokens => new Node('', tokens[0].value)
+    ;

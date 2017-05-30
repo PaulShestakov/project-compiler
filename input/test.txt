@@ -54,3 +54,15 @@ matched_stmt -> if expr them matched_stmt else matched_stmt
 
 open_stmt -> if expr then stmt
     | if expr then matched_stmt else open_stmt
+
+
+
+
+
+    var b = 5 + 5 ;
+
+        var c = 5 + ( 6 + 7 ) ;
+
+        if ( 5 = 5 ) { var d = 8 ; } ;
+
+        while ( 1 * ( 5 + 7 ) ) { var e = 9 ; } ;

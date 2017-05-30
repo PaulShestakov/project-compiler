@@ -10,3 +10,50 @@ STMT -> EXPR
     | <IF> <L_BRACE> EXPR <R_BRACE> STMT;
 
 EXPR -> <VAR> <ID> <EQUALS> <NUMBER>;
+
+
+
+
+
+
+S' ->
+    PROGRAM;
+
+PROGRAM -> BLOCKS;
+
+BLOCKS -> BLOCK BLOCKS
+    | BLOCK;
+
+BLOCK ->
+    <L_BRACE> CLOSED_STMTS <R_BRACE>;
+
+CLOSED_STMTS ->
+    CLOSED_STMT CLOSED_STMTS
+    | <E>;
+
+CLOSED_STMT -> STMT <SEMICOLON>;
+
+
+STMT ->
+    <VAR> <ID> <EQUAL> EXPR
+    | <IF> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+    | <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+    | <DO> BLOCK <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS>;
+
+
+EXPR ->
+    EXPR <PLUS> TERM
+    | EXPR <MINUS> TERM
+    | TERM
+
+    | EXPR <EQUAL> EXPR
+    | EXPR <PLUS_EQUAL> EXPR;
+
+TERM ->
+    TERM <MULTIPLY> FACTOR                                              # TERM.node = new Node("MULTIPLY", TERM.value, FACTOR.value)
+    | TERM <DIVIDE> FACTOR                                              # TERM.node = new Node("DIVIDE", TERM.value, FACTOR.value)
+    | FACTOR                                                            # TERM.node = FACTOR.node;
+
+FACTOR ->
+    <NUMBER>                                                            # FACTOR.node = new LEAF('number', NUMBER.value)
+    | <L_PARENTHESIS> EXPR <R_PARENTHESIS>                              # FACTOR.node = EXPR.node;

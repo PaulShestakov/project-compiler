@@ -10,6 +10,8 @@ const SYMBOLS = {
 	'+': Tag.PLUS,
 	'-': Tag.MINUS,
 	'*': Tag.MULTIPLY,
+	'/': Tag.DIVIDE,
+	'+=': Tag.PLUS_EQUAL,
 
 	'>': Tag.MORE,
 	'<': Tag.LESS,
@@ -17,7 +19,6 @@ const SYMBOLS = {
 	'>=': Tag.MORE_EQUAL,
 	'<=': Tag.LESS_EQUAL,
 	'==': Tag.LOOSE_EQUAL,
-	'===': Tag.STRICT_EQUAL,
 
 	';': Tag.SEMICOLON
 };

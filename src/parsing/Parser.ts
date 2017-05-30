@@ -1,16 +1,13 @@
 import NonTerminal from "../lexing/rules/util/NonTerminal";
 import Terminal from "../lexing/rules/util/Terminal";
 import Rule from "./../lexing/rules/util/Rule";
-import Token from "../../lib/lexing/util/Token";
-import Tag from './../lexing/util/Tag';
+import Token from "./../lexing/util/Token";
 import Condition from "./util/Condition";
 import Item from "./util/Item";
-
 
 const START_NON_TERMINAL = new NonTerminal('S\'');
 const EMPTY_TERMINAL = new Terminal('E');
 const EOF_TERMINAL = new Terminal('EOF');
-
 
 
 function ThrowParseError(config) {
@@ -20,7 +17,6 @@ function ThrowParseError(config) {
 
 
 export class Parser {
-
 	private rules: Rule[];
 	private tokens: Token[];
 	private grammarSymbols: Array<Terminal|NonTerminal>;
@@ -53,9 +49,7 @@ export class Parser {
 				}
 			});
 
-
 		} else {
-
 			let currentXIndex = 0;
 
 			for (let i = 0; i < X.length; i++) {
@@ -76,7 +70,6 @@ export class Parser {
 				}
 			}
 		}
-
 		return result;
 	}
 
@@ -107,7 +100,9 @@ export class Parser {
 								return term.equals(EMPTY_TERMINAL);
 							}).length > 0;
 
-						result = result.concat(firstB.filter(elem => !elem.equals(EMPTY_TERMINAL)));
+						result = result.concat(
+							firstB.filter(elem => !elem.equals(EMPTY_TERMINAL))
+						);
 
 						// If may be empty
 						if (hasEmptyTerminal) {
@@ -128,14 +123,14 @@ export class Parser {
 				}
 			});
 		});
-		return this.dedupSymbols(result);
+
+		return Parser.dedupSymbols(result);
 	}
 
 
 	CLOSURE(items: Item[]): Item[] {
 
 		let closure: Item[] = items;
-
 		let newItems = [];
 
 		do {
@@ -148,12 +143,12 @@ export class Parser {
 
 				if (nextElem instanceof NonTerminal) {
 
-					this.rules.forEach((rule: Rule, index) => {
+					this.rules.forEach((rule: Rule) => {
 
 						if (nextElem.equals(rule.lhs)) {
 
 							// Check for empty rule
-							if (rule.rhs.length == 1 && rule.rhs[0].equals(EMPTY_TERMINAL)) {
+							if (rule.isEmptyRule()) {
 								let isAlreadyAdded = closure.filter(item => {
 										return item.rule.equals(rule)
 											&& item.marker === 1;
@@ -163,6 +158,7 @@ export class Parser {
 									newItems.push(new Item(rule, 1));
 								}
 							}
+							// The usual rule
 							else {
 								let isAlreadyAdded = closure.filter(item => {
 										return item.rule.equals(rule)
@@ -187,7 +183,6 @@ export class Parser {
 
 
 	GOTO(items: Item[], nextElem: Terminal | NonTerminal) {
-
 		let nextBasisItems = items.filter(item => {
 				let nextRuleElem = item.rule.rhs[item.marker];
 
@@ -213,7 +208,6 @@ export class Parser {
 		let startItem = new Item(startRule, 0);
 		let startClosure = this.CLOSURE([startItem]);
 		let startCondition = new Condition(startClosure);
-
 		let resultConditions = [startCondition];
 		let currentConditions = [];
 		let newConditionsCount = 1;
@@ -327,90 +321,96 @@ export class Parser {
 		})
 	}
 
-
-	parse() {
-
+	parse(): Rule[] {
 		this.buildCanonicalSet();
-
 		this.buildFSMTable();
 
-		// Collect sequence of reduces to build a tree
-		let reducesSequence = [];
+		let startStateIndex = 0;
+		let startState = this.canonicalSet[0];
+		let statesStack = [startState];
+		let tokens = this.tokens;
 
-		let startCondIndex = 0;
-		let startCond = this.canonicalSet[0];
-		let stack = [startCond];
+		let reducesSequence = [];
+		let tokensStack = [];
 
 		while (true) {
-			let cond = stack[stack.length - 1];
-			let token = this.tokens[0];
+			let currentState = statesStack[statesStack.length - 1];
+			let token = tokens[0];
 			let terminal = new Terminal(token.getTag());
 
-			let action = this.ACTION(cond.getIndex(), terminal);
+			let action = this.ACTION(currentState.getIndex(), terminal);
 
 			if (!action) {
 				ThrowParseError({
-					message: 'LR error on step',
-					stack: JSON.stringify(stack.map(x => x.getIndex()).join()),
-					tokens: JSON.stringify(this.tokens)
+					message: 'Unknown FSM action'
 				});
-			}
+			} else {
 
-			else if (action.description.operation === 'SHIFT') {
+				let operationName = action.description.operation;
+				let nextState = action.description.nextState;
 
-				// console.log('SHIFT');
-				// console.log(JSON.stringify(action.description.item));
-				// console.log(stack.map(x => x.getIndex()).join());
-
-				this.tokens = this.tokens.slice(1);
-				stack.push(action.description.nextState);
-
-				//console.log(JSON.stringify(action.description.nextState));
-			}
-
-			else if (action.description.operation === 'REDUCE') {
-
-				console.log('REDUCE');
-				action.description.rule.logRule();
-				//console.log(JSON.stringify(action.description.item));
-				//console.log(stack.map(x => x.getIndex()).join());
-
-				var length;
-				if (action.description.rule.rhs[0].equals(EMPTY_TERMINAL)) {
-					length = 0;
-				} else {
-					length = action.description.rule.rhs.length;
+				if (operationName === 'SHIFT') {
+					tokensStack.push(tokens.shift());
+					statesStack.push(nextState);
 				}
+				else if (operationName === 'REDUCE') {
 
-				if (length > 0) {
-					stack = stack.slice(0, -length);
+					let reduceRule = action.description.rule;
+
+					// Remove from stack length of production rhs items
+					let length;
+					if (reduceRule.isEmptyRule()) {
+						length = 0;
+						tokensStack.push(new Token(
+							'E',
+							null
+						));
+					} else {
+						length = reduceRule.rhs.length;
+						statesStack = statesStack.slice(0, -length);
+					}
+
+					// Perform reduce
+					let topState = statesStack[statesStack.length - 1];
+					let actionAfterReduce = this.ACTION(topState.getIndex(), action.description.rule.lhs);
+					statesStack.push(actionAfterReduce.description.nextState);
+
+					// Get tokens, that correspond to reduced rule
+					let ruleTokens;
+					if (length > 0) {
+						ruleTokens = tokensStack.slice(-length);
+
+						tokensStack = tokensStack.slice(0, -length);
+
+						tokensStack.push(new Token(
+							action.description.rule.lhs.getName(),
+							null
+						));
+					} else {
+						ruleTokens = tokensStack.slice(-1);
+					}
+
+					console.log('REDUCE');
+					action.description.rule.logRule();
+					console.log(ruleTokens);
+					console.log(action.description.rule.semanticRule);
+
 				}
-
-				let topState = stack[stack.length - 1];
-
-				let actionAfterReduce = this.ACTION(topState.getIndex(), action.description.rule.lhs);
-				stack.push(actionAfterReduce.description.nextState);
-			}
-
-			else if (action.description.operation === 'SUCCESS') {
-				console.log('SUCCESS');
-				break;
-			}
-
-			else {
-				ThrowParseError({
-					message: 'Unknown LR step type'
-				});
+				else if (operationName === 'SUCCESS') {
+					console.log('SUCCESS');
+					break;
+				}
+				else {
+					ThrowParseError({
+						message: 'Unknown LR step type'
+					});
+				}
 			}
 		}
 
-		console.log(reducesSequence);
-
-
+		return reducesSequence;
 	}
 
-
-	// UTIL:
 	addToFSM(index: number, symbol: Terminal | NonTerminal, value: any) {
 		if (!this.FSM[index]) {
 			this.FSM[index] = [];
@@ -420,23 +420,24 @@ export class Parser {
 			description: value
 		});
 	}
+
 	getFromFSM(index: number, symbol: Terminal | NonTerminal) {
 		return this.FSM[index].filter(op => {
 			return op.symbol.equals(symbol);
 		})[0];
 	}
-	dedup(array, comp) {
-		let unique = [];
 
+	static dedup(array, comp) {
+		let unique = [];
 		array.forEach(item => {
 			if (unique.filter(comp.bind(null, item)).length === 0) {
 				unique.push(item);
 			}
 		});
-
 		return unique;
 	}
-	dedupSymbols(symbols) {
+
+	static dedupSymbols(symbols) {
 		return this.dedup(symbols, (a, b) => {
 			return a.equals(b);
 		})
