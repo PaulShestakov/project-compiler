@@ -4,7 +4,7 @@ S' ->
 PROGRAM -> BLOCKS;
 
 BLOCKS -> BLOCK BLOCKS
-    | BLOCK;
+    | <E>;
 
 BLOCK ->
     <L_BRACE> CLOSED_STMTS <R_BRACE>;
