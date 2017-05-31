@@ -44,10 +44,7 @@ export default class RulesParser {
 
 				let rhs = rhsParts[0].trim();
 
-				let semanticRule;
-				if (rhsParts[1]) {
-					semanticRule = eval(rhsParts[1]);
-				}
+				let description = rhsParts[1].trim();
 
 				let rhsElements = rhs.split(' ')
 					.filter(element => !! element)
@@ -64,7 +61,7 @@ export default class RulesParser {
 				return new Rule(
 					new NonTerminal(lhs),
 					rhsElements,
-					semanticRule
+					description
 				);
 			});
 	}

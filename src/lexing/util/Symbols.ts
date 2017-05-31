@@ -18,7 +18,7 @@ const SYMBOLS = {
 	'=': Tag.EQUAL,
 	'>=': Tag.MORE_EQUAL,
 	'<=': Tag.LESS_EQUAL,
-	'==': Tag.LOOSE_EQUAL,
+	'==': Tag.EQUALS,
 
 	';': Tag.SEMICOLON
 };

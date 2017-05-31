@@ -344,7 +344,8 @@ export class Parser {
 
 			if (!action) {
 				ThrowParseError({
-					message: 'Unknown FSM action'
+					message: 'Unknown FSM action',
+					terminal: terminal
 				});
 			} else {
 
@@ -352,9 +353,14 @@ export class Parser {
 				let nextState = action.description.nextState;
 
 				if (operationName === 'SHIFT') {
+					console.log('SHIFT')
+					//action.description.rule.logRule()
 					let shiftedToken = tokens.shift();
 
-					nodesStack.push(new Node(shiftedToken));
+					nodesStack.push({
+						isLeaf: true,
+						token: shiftedToken
+					});
 
 					statesStack.push(nextState);
 				}
@@ -369,7 +375,10 @@ export class Parser {
 						length = 0;
 
 						let emptyToken = new Token('E', null);
-						nodesStack.push(new Node(emptyToken));
+						nodesStack.push({
+							isLeaf: true,
+							token: emptyToken
+						});
 
 					} else {
 						length = reduceRule.rhs.length;
@@ -391,11 +400,16 @@ export class Parser {
 						nodesStack = nodesStack.slice(0, -1);
 					}
 
-					nodesStack.push(
-						new Node(
-							reduceRule.lhs,
-							ruleNodes
-						)
+					nodesStack.push({
+							isLeaf: false,
+							rule: reduceRule,
+							children: ruleNodes
+						}
+						// new Node(
+						// 	reduceRule,
+						// 	false,
+						// 	ruleNodes
+						// )
 					);
 
 					console.log('REDUCE');
@@ -417,9 +431,7 @@ export class Parser {
 				}
 			}
 		}
-		console.log(JSON.stringify(nodesStack[0]))
-		ascendantWalk(nodesStack[0]);
-		return reducesSequence;
+		return nodesStack[0];
 	}
 
 	addToFSM(index: number, symbol: Terminal | NonTerminal, value: any) {
@@ -455,31 +467,33 @@ export class Parser {
 	}
 }
 
+//
+// class Node {
+// 	public value;
+// 	public rule: Rule;
+// 	public isLeaf: boolean;
+// 	public children: Node[] = [];
+//
+// 	constructor(rule: Rule, isLeaf: boolean, children?: Node[]) {
+// 		this.rule = rule;
+// 		if (children) {
+// 			this.children = children;
+// 		}
+// 	}
+//
+// 	addChild(node: Node) {
+// 		this.children.push(node);
+// 	}
+// }
 
-class Node {
-	public value;
-	public children: Node[] = [];
-
-	constructor(value, children?: Node[]) {
-		this.value = value;
-
-		if (children) {
-			this.children = children;
-		}
-	}
-
-	addChild(node: Node) {
-		this.children.push(node);
-	}
-}
 
 
-function ascendantWalk(node) {
-	//console.log(JSON.stringify(node.children))
-	node.children.forEach(child => ascendantWalk(child));
-	visit(node);
-}
 
-function visit(node: Node) {
-	//console.log(node.value)
-}
+
+
+
+
+
+
+
+
