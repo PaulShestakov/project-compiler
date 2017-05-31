@@ -333,6 +333,8 @@ export class Parser {
 		let reducesSequence = [];
 		let tokensStack = [];
 
+		let nodesStack = [];
+
 		while (true) {
 			let currentState = statesStack[statesStack.length - 1];
 			let token = tokens[0];
@@ -350,21 +352,25 @@ export class Parser {
 				let nextState = action.description.nextState;
 
 				if (operationName === 'SHIFT') {
-					tokensStack.push(tokens.shift());
+					let shiftedToken = tokens.shift();
+
+					nodesStack.push(new Node(shiftedToken));
+
 					statesStack.push(nextState);
 				}
 				else if (operationName === 'REDUCE') {
 
 					let reduceRule = action.description.rule;
+					reducesSequence.push(reduceRule);
 
 					// Remove from stack length of production rhs items
 					let length;
 					if (reduceRule.isEmptyRule()) {
 						length = 0;
-						tokensStack.push(new Token(
-							'E',
-							null
-						));
+
+						let emptyToken = new Token('E', null);
+						nodesStack.push(new Node(emptyToken));
+
 					} else {
 						length = reduceRule.rhs.length;
 						statesStack = statesStack.slice(0, -length);
@@ -372,28 +378,32 @@ export class Parser {
 
 					// Perform reduce
 					let topState = statesStack[statesStack.length - 1];
-					let actionAfterReduce = this.ACTION(topState.getIndex(), action.description.rule.lhs);
+					let actionAfterReduce = this.ACTION(topState.getIndex(), reduceRule.lhs);
 					statesStack.push(actionAfterReduce.description.nextState);
 
 					// Get tokens, that correspond to reduced rule
-					let ruleTokens;
+					let ruleNodes;
 					if (length > 0) {
-						ruleTokens = tokensStack.slice(-length);
-
-						tokensStack = tokensStack.slice(0, -length);
-
-						tokensStack.push(new Token(
-							action.description.rule.lhs.getName(),
-							null
-						));
+						ruleNodes = nodesStack.slice(-length);
+						nodesStack = nodesStack.slice(0, -length);
 					} else {
-						ruleTokens = tokensStack.slice(-1);
+						ruleNodes = nodesStack.slice(-1);
+						nodesStack = nodesStack.slice(0, -1);
 					}
+
+					nodesStack.push(
+						new Node(
+							reduceRule.lhs,
+							ruleNodes
+						)
+					);
 
 					console.log('REDUCE');
 					action.description.rule.logRule();
-					console.log(ruleTokens);
-					console.log(action.description.rule.semanticRule);
+					console.log(JSON.stringify(ruleNodes));
+					// console.log(action.description.rule.semanticRule);
+
+
 
 				}
 				else if (operationName === 'SUCCESS') {
@@ -407,7 +417,8 @@ export class Parser {
 				}
 			}
 		}
-
+		console.log(JSON.stringify(nodesStack[0]))
+		ascendantWalk(nodesStack[0]);
 		return reducesSequence;
 	}
 
@@ -442,4 +453,33 @@ export class Parser {
 			return a.equals(b);
 		})
 	}
+}
+
+
+class Node {
+	public value;
+	public children: Node[] = [];
+
+	constructor(value, children?: Node[]) {
+		this.value = value;
+
+		if (children) {
+			this.children = children;
+		}
+	}
+
+	addChild(node: Node) {
+		this.children.push(node);
+	}
+}
+
+
+function ascendantWalk(node) {
+	//console.log(JSON.stringify(node.children))
+	node.children.forEach(child => ascendantWalk(child));
+	visit(node);
+}
+
+function visit(node: Node) {
+	//console.log(node.value)
 }
