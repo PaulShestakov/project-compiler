@@ -1,69 +1,88 @@
 S' ->
-    PROGRAM;
+    PROGRAM
+        #   S_RESOLVE;
 
-PROGRAM -> BLOCKS;
+PROGRAM ->
+    BLOCK
+        #   PROGRAM_RESOLVE;
 
-BLOCKS -> BLOCK BLOCKS
-    | <E>;
+BLOCKS ->
+    BLOCK BLOCKS
+        #   BLOCKS
+    | <E>
+        #   EMPTY_BLOCK;
 
 BLOCK ->
-    <L_BRACE> CLOSED_STMTS <R_BRACE>;
+    <L_BRACE> CLOSED_STMTS BLOCKS <R_BRACE>
+        #   BLOCK;
+
+
+
 
 CLOSED_STMTS ->
     CLOSED_STMT CLOSED_STMTS
-    | <E>;
+        #   CLOSED_STATEMENTS
+    | <E>
+        #   0;
 
-CLOSED_STMT -> STMT <SEMICOLON>;
+CLOSED_STMT ->
+    STMT <SEMICOLON>
+        #   CLOSED_STATEMENT;
 
 
 STMT ->
     <VAR> <ID> <EQUAL> EXPR
-        #   tokens => new Node('DECLARATION', tokens[1].name, tokens[3].value)
+        #   STATEMENT
 
     | <IF> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
-        #   tokens => new Node('IF', tokens[2].name, tokens[4].value)
+        #   IF
 
     | <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
-        #   tokens => new Node('WHILE', tokens[2].name, tokens[4].value)
+        #   WHILE
 
     | <DO> BLOCK <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS>
-        #   tokens => new Node('DO_WHILE', tokens[1].name, tokens[4].value)
-    ;
+        #   DO_WHILE
+
+    | <ID> <EQUAL> EXPR
+        # ASSIGNMENT_EXPRESSION
+
+    | <ID> <PLUS_EQUAL> EXPR
+        #   INCREMENT_EXPRESSION;
 
 
 EXPR ->
     EXPR <PLUS> TERM
-        #   tokens => new Node('PLUS', tokens[0].value, tokens[2].value)
+        #   ADD_EXPRESSION
 
     | EXPR <MINUS> TERM
-        #   tokens => new Node('MINUS', tokens[0].value, tokens[2].value)
+        #   MINUS_EXPRESSION
 
     | TERM
-        #   tokens => new Node('', tokens[0].value)
+        #   EXPR_RESOLVE
 
-    | EXPR <EQUAL> EXPR
-        #   tokens => new Node('EQUAL', tokens[0].value, tokens[2].value)
-
-    | EXPR <PLUS_EQUAL> EXPR
-        #   tokens => new Node('PLUS_EQUAL', tokens[0].value, tokens[2].value)
-    ;
+    | <ID>
+        #   EXPR_ID;
 
 TERM ->
     TERM <MULTIPLY> FACTOR
-        #   tokens => new Node('MULTIPLY', tokens[0].value, tokens[2].value)
+        #   MULTIPLY_EXPRESSION
 
     | TERM <DIVIDE> FACTOR
-        #   tokens => new Node('DIVIDE', tokens[0].value, tokens[2].value)
+        #   DIVIDE_EXPRESSION
 
     | FACTOR
-        #   tokens => new Node('', tokens[0].value)
-    ;
+        #   TERM_RESOLVE
+
+    | <ID>
+        #   TERM_ID;
 
 
 FACTOR ->
     <NUMBER>
-        #   tokens => new Leaf('NUMBER', tokens[0].value)
+        #   FACTOR_RESOLVE
 
     | <L_PARENTHESIS> EXPR <R_PARENTHESIS>
-        #   tokens => new Node('', tokens[0].value)
-    ;
+        #   FACTOR_PARENTHESIS
+
+    | <ID>
+        #   FACTOR_ID;

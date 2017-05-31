@@ -4,7 +4,7 @@ import Lexer from './lexing/Lexer';
 import { Parser } from "./parsing/Parser";
 import Rule from "./lexing/rules/util/Rule";
 import { buildParsingTree } from "./parsing/tree/main";
-
+import ascendantWalk from './codeGenerating/main';
 
 (function() {
 	let lexer = new Lexer('./input/newText2.txt');
@@ -17,9 +17,9 @@ import { buildParsingTree } from "./parsing/tree/main";
 	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
 
 	let parser = new Parser(rules, tokens, grammarSymbols);
-	let reducesSequence: Rule[] = parser.parse();
+	let tree = parser.parse();
 
-	let tree = buildParsingTree(reducesSequence);
+	ascendantWalk(tree);
 
 
 

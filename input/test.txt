@@ -66,3 +66,103 @@ open_stmt -> if expr then stmt
         if ( 5 = 5 ) { var d = 8 ; } ;
 
         while ( 1 * ( 5 + 7 ) ) { var e = 9 ; } ;
+
+
+S' ->
+    PROGRAM
+        #   S_RESOLVE;
+
+PROGRAM ->
+    BLOCK
+        #   PROGRAM_RESOLVE;
+
+BLOCKS ->
+    BLOCK BLOCKS
+        #   BLOCKS
+    | <E>
+        #   EMPTY_BLOCK;
+
+BLOCK ->
+    <L_BRACE> BLOCKS_AND_STATEMENTS <R_BRACE>
+        #   BLOCK;
+
+BLOCKS_AND_STATEMENTS ->
+    BLOCK BLOCKS_AND_STATEMENTS
+        #   0
+    | CLOSED_STMTS BLOCKS_AND_STATEMENTS
+        #   1
+    | BLOCK
+        #   2
+    | CLOSED_STMTS
+        #   3;
+
+
+
+
+CLOSED_STMTS ->
+    CLOSED_STMT CLOSED_STMTS
+        #   CLOSED_STATEMENTS
+    | CLOSED_STMT
+        #   0;
+
+CLOSED_STMT ->
+    STMT <SEMICOLON>
+        #   CLOSED_STATEMENT;
+
+
+STMT ->
+    <VAR> <ID> <EQUAL> EXPR
+        #   STATEMENT
+
+    | <IF> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+        #   IF
+
+    | <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+        #   WHILE
+
+    | <DO> BLOCK <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS>
+        #   DO_WHILE
+
+    | <ID> <EQUAL> EXPR
+        # ASSIGNMENT_EXPRESSION
+
+    | <ID> <PLUS_EQUAL> EXPR
+        #   INCREMENT_EXPRESSION;
+
+
+EXPR ->
+    EXPR <PLUS> TERM
+        #   ADD_EXPRESSION
+
+    | EXPR <MINUS> TERM
+        #   MINUS_EXPRESSION
+
+    | TERM
+        #   EXPR_RESOLVE
+
+    | <ID>
+        #   EXPR_ID;
+
+TERM ->
+    TERM <MULTIPLY> FACTOR
+        #   MULTIPLY_EXPRESSION
+
+    | TERM <DIVIDE> FACTOR
+        #   DIVIDE_EXPRESSION
+
+    | FACTOR
+        #   TERM_RESOLVE
+
+    | <ID>
+        #   TERM_ID;
+
+
+FACTOR ->
+    <NUMBER>
+        #   FACTOR_RESOLVE
+
+    | <L_PARENTHESIS> EXPR <R_PARENTHESIS>
+        #   FACTOR_PARENTHESIS
+
+    | <ID>
+        #   FACTOR_ID;

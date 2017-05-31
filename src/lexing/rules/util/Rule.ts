@@ -7,12 +7,12 @@ export default class Rule {
 	public lhs: NonTerminal;
 	public rhs: Array<Terminal | NonTerminal>;
 
-	public semanticRule;
+	public description: string;
 
-	constructor(lhs: NonTerminal, rhs: Array<Terminal | NonTerminal>, semanticRule?) {
+	constructor(lhs: NonTerminal, rhs: Array<Terminal | NonTerminal>, description: string) {
 		this.lhs = lhs;
 		this.rhs = rhs;
-		this.semanticRule = semanticRule;
+		this.description = description;
 	}
 
 	logRule() {
