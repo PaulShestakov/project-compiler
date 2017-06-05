@@ -11,7 +11,14 @@ const SYMBOLS = {
 	'-': Tag.MINUS,
 	'*': Tag.MULTIPLY,
 	'/': Tag.DIVIDE,
+
 	'+=': Tag.PLUS_EQUAL,
+	'-=': Tag.MINUS_EQUAL,
+	'*=': Tag.MULTIPLY_EQUAL,
+	'/=': Tag.DIVIDE_EQUAL,
+
+	'++': Tag.PLUS_PLUS,
+	'--': Tag.MINUS_MINUS,
 
 	'>': Tag.MORE,
 	'<': Tag.LESS,

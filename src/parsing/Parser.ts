@@ -321,7 +321,7 @@ export class Parser {
 		})
 	}
 
-	parse(): Rule[] {
+	parse() {
 		this.buildCanonicalSet();
 		this.buildFSMTable();
 
@@ -353,7 +353,7 @@ export class Parser {
 				let nextState = action.description.nextState;
 
 				if (operationName === 'SHIFT') {
-					console.log('SHIFT')
+					// console.log('SHIFT')
 					//action.description.rule.logRule()
 					let shiftedToken = tokens.shift();
 
@@ -412,9 +412,9 @@ export class Parser {
 						// )
 					);
 
-					console.log('REDUCE');
-					action.description.rule.logRule();
-					console.log(JSON.stringify(ruleNodes));
+					// console.log('REDUCE');
+					// action.description.rule.logRule();
+					// console.log(JSON.stringify(ruleNodes));
 					// console.log(action.description.rule.semanticRule);
 
 
