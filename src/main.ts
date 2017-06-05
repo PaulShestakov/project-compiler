@@ -7,13 +7,13 @@ import { buildParsingTree } from "./parsing/tree/main";
 import ascendantWalk from './codeGenerating/main';
 
 (function() {
-	let lexer = new Lexer('./input/newText2.txt');
+	let lexer = new Lexer('./input/Code.txt');
 	lexer.lex();
 	let tokens: Token[] = lexer.getTokens();
 
-	console.log(tokens);
+	//console.log(tokens);
 
-	let rules = RulesParser.getRules('./input/newRules2.txt');
+	let rules = RulesParser.getRules('./input/Rules.txt');
 	let grammarSymbols = RulesParser.getGrammarSymbols(rules);
 
 	let parser = new Parser(rules, tokens, grammarSymbols);
@@ -21,9 +21,5 @@ import ascendantWalk from './codeGenerating/main';
 
 	ascendantWalk(tree);
 
-
-
-
-
-
+	console.log(tree.code)
 })();

@@ -1,59 +1,79 @@
-S' -> PROGRAM;
-
-PROGRAM -> BLOCK;
-
-BLOCK -> <L_BRACE> STMTS <R_BRACE>;
-
-STMTS -> STMT <SEMICOLON>;
-
-STMT -> EXPR
-    | <IF> <L_BRACE> EXPR <R_BRACE> STMT;
-
-EXPR -> <VAR> <ID> <EQUALS> <NUMBER>;
-
-
-
-
-
-
 S' ->
-    PROGRAM;
+    PROGRAM
+        #   S_RESOLVE;
 
-PROGRAM -> BLOCKS;
+PROGRAM ->
+    BLOCK
+        #   PROGRAM_RESOLVE_BLOCK;
 
-BLOCKS -> BLOCK BLOCKS
-    | BLOCK;
+BLOCKS ->
+    BLOCK BLOCKS
+        #   BLOCKS
+    | <E>
+        #   EMPTY_BLOCK;
 
 BLOCK ->
-    <L_BRACE> CLOSED_STMTS <R_BRACE>;
+    <L_BRACE> CLOSED_STMTS BLOCKS <R_BRACE>
+        #   BLOCK;
 
 CLOSED_STMTS ->
     CLOSED_STMT CLOSED_STMTS
-    | <E>;
+        #   CLOSED_STATEMENTS
+    | <E>
+        #   EMPTY_CLOSED_STATEMENTS;
 
-CLOSED_STMT -> STMT <SEMICOLON>;
+CLOSED_STMT ->
+    STMT <SEMICOLON>
+        #   CLOSED_STATEMENT;
 
 
 STMT ->
     <VAR> <ID> <EQUAL> EXPR
+        #   STATEMENT
+
     | <IF> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
+        #   IF
+
     | <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS> BLOCK
-    | <DO> BLOCK <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS>;
+        #   WHILE
+
+    | <DO> BLOCK <WHILE> <L_PARENTHESIS> EXPR <R_PARENTHESIS>
+        #   DO_WHILE
+
+    | <ID> <EQUAL> EXPR
+        # ASSIGNMENT_EXPRESSION
+
+    | <ID> <PLUS_EQUAL> EXPR
+        #   INCREMENT_EXPRESSION;
 
 
 EXPR ->
     EXPR <PLUS> TERM
-    | EXPR <MINUS> TERM
-    | TERM
+        #   ADD_EXPRESSION
 
-    | EXPR <EQUAL> EXPR
-    | EXPR <PLUS_EQUAL> EXPR;
+    | EXPR <MINUS> TERM
+        #   MINUS_EXPRESSION
+
+    | TERM
+        #   EXPR_RESOLVE_TERM;
 
 TERM ->
-    TERM <MULTIPLY> FACTOR                                              # TERM.node = new Node("MULTIPLY", TERM.value, FACTOR.value)
-    | TERM <DIVIDE> FACTOR                                              # TERM.node = new Node("DIVIDE", TERM.value, FACTOR.value)
-    | FACTOR                                                            # TERM.node = FACTOR.node;
+    TERM <MULTIPLY> FACTOR
+        #   TERM_MULTIPLY
+
+    | TERM <DIVIDE> FACTOR
+        #   TERM_DIVIDE
+
+    | FACTOR
+        #   TERM_RESOLVE_FACTOR;
+
 
 FACTOR ->
-    <NUMBER>                                                            # FACTOR.node = new LEAF('number', NUMBER.value)
-    | <L_PARENTHESIS> EXPR <R_PARENTHESIS>                              # FACTOR.node = EXPR.node;
+    <NUMBER>
+        #   FACTOR_RESOLVE_NUMBER
+
+    | <L_PARENTHESIS> EXPR <R_PARENTHESIS>
+        #   FACTOR_PARENTHESIS
+
+    | <ID>
+        #   FACTOR_RESOLVE_ID;
